@@ -96,7 +96,7 @@ func (f *FileObjectStore) PutObject(bucket string, key string, body io.Reader) e
 
 	container := f.service.NewContainerURL(bucket)
 	blobURL := container.NewBlockBlobURL(key)
-	_, err := azblob.UploadStreamToBlockBlob(context.Background(), body, blobURL, azblob.UploadStreamToBlockBlobOptions{ClientProvidedKeyOptions: *o.cpk})
+	_, err := azblob.UploadStreamToBlockBlob(context.Background(), body, blobURL, azblob.UploadStreamToBlockBlobOptions{ClientProvidedKeyOptions: *f.cpk})
 
 	if err != nil {
 		return err
@@ -113,7 +113,7 @@ func (f *FileObjectStore) ObjectExists(bucket, key string) (bool, error) {
 	ctx := context.Background()
 	container := f.service.NewContainerURL(bucket)
 	blob := container.NewBlobURL(key)
-	_, err := blob.GetProperties(ctx, azblob.BlobAccessConditions{}, *o.cpk)
+	_, err := blob.GetProperties(ctx, azblob.BlobAccessConditions{}, *f.cpk)
 
 	if err == nil {
 		return true, err
@@ -209,7 +209,7 @@ func (f *FileObjectStore) CreateSignedURL(bucket, key string, ttl time.Duration)
 		ExpiryTime:    time.Now().UTC().Add(ttl),
 		ContainerName: bucket,
 		BlobName:      key,
-		Permissions:   azblob.BlobSASPermissions{Add: false, Read: true, Write: false}.String()}.NewSASQueryParameters(o.credential)
+		Permissions:   azblob.BlobSASPermissions{Add: false, Read: true, Write: false}.String()}.NewSASQueryParameters(f.credential)
 	if err != nil {
 		log.Fatal(err)
 	}
