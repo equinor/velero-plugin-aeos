@@ -56,14 +56,14 @@ func (f *FileObjectStore) Init(config map[string]string) error {
 		return err
 	}
 
-	key := os.Getenv("AZURE_ENCRYPTION_KEY")
-	hash := os.Getenv("AZURE_ENCRYPTION_HASH")
+	key := os.Getenv(encryptionKeyEnvVar)
+	hash := os.Getenv(encryptionHashEnvVar)
 	scope := ""
 	cpk := azblob.NewClientProvidedKeyOptions(&key, &hash, &scope)
 
-	storageAccountKey, _, err := getStorageAccountKey(config)
-	if err != nil {
-		return err
+	storageAccountKey := os.Getenv(storageAccountKeyEnvVarConfigKey)
+	if storageAccountKey != "" {
+		return errors.New("storage account key env var not set")
 	}
 
 	cred, err := azblob.NewSharedKeyCredential(config[storageAccountConfigKey], storageAccountKey)
@@ -218,5 +218,5 @@ func (f *FileObjectStore) CreateSignedURL(bucket, key string, ttl time.Duration)
 	SasUri := fmt.Sprintf("https://%s.blob.core.windows.net/%s/%s?%s",
 		f.credential.AccountName(), bucket, key, qp)
 
-	return SasUri, errors.New("Not Implemented")
+	return SasUri, errors.New("not implemented")
 }

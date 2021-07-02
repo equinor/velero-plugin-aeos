@@ -6,6 +6,8 @@ const (
 	storageAccountKeyEnvVarConfigKey = "storageAccountKeyEnvVar"
 	subscriptionIDConfigKey          = "subscriptionId"
 	blockSizeConfigKey               = "blockSizeInBytes"
+	encryptionKeyEnvVar              = "AZURE_ENCRYPTION_KEY"
+	encryptionHashEnvVar             = "AZURE_ENCRYPTION_HASH"
 
 	// blocks must be less than/equal to 100MB in size
 	// ref. https://docs.microsoft.com/en-us/rest/api/storageservices/put-block#uri-parameters
