@@ -17,19 +17,25 @@ limitations under the License.
 package plugin
 
 import (
+	"context"
 	"errors"
+	"fmt"
 	"io"
-	"io/ioutil"
+	"net/url"
 	"os"
-	"path/filepath"
-	"strings"
 	"time"
 
+	"github.com/Azure/azure-pipeline-go/pipeline"
+	"github.com/Azure/azure-storage-blob-go/azblob"
 	"github.com/sirupsen/logrus"
 )
 
 type FileObjectStore struct {
-	log logrus.FieldLogger
+	log        logrus.FieldLogger
+	credential *azblob.SharedKeyCredential
+	pipeline   *pipeline.Pipeline
+	service    *azblob.ServiceURL
+	cpk        *azblob.ClientProvidedKeyOptions
 }
 
 // NewFileObjectStore instantiates a FileObjectStore.
@@ -40,158 +46,155 @@ func NewFileObjectStore(log logrus.FieldLogger) *FileObjectStore {
 // Init initializes the plugin. After v0.10.0, this can be called multiple times.
 func (f *FileObjectStore) Init(config map[string]string) error {
 	f.log.Infof("FileObjectStore.Init called")
-
-	path := filepath.Join(getRoot(), config["bucket"], config["prefix"])
-	return os.MkdirAll(path, 0755)
-}
-
-func (f *FileObjectStore) PutObject(bucket string, key string, body io.Reader) error {
-	path := filepath.Join(getRoot(), bucket, key)
-
-	log := f.log.WithFields(logrus.Fields{
-		"bucket": bucket,
-		"key":    key,
-		"path":   path,
-	})
-	log.Infof("PutObject")
-
-	dir := filepath.Dir(path)
-	log.Infof("Creating dir %s", dir)
-	if err := os.MkdirAll(dir, 0755); err != nil {
+	if err := veleroplugin.ValidateObjectStoreConfigKeys(config,
+		resourceGroupConfigKey,
+		storageAccountConfigKey,
+		subscriptionIDConfigKey,
+		storageAccountKeyEnvVarConfigKey,
+	); err != nil {
 		return err
 	}
 
-	log.Infof("Creating file")
-	file, err := os.Create(path)
+	key := os.Getenv("AZURE_ENCRYPTION_KEY")
+	hash := os.Getenv("AZURE_ENCRYPTION_HASH")
+	scope := ""
+	cpk := azblob.NewClientProvidedKeyOptions(&key, &hash, &scope)
+
+	storageAccountKey, _, err := getStorageAccountKey(config)
 	if err != nil {
 		return err
 	}
-	defer file.Close()
 
-	log.Infof("Writing to file")
-	_, err = io.Copy(file, body)
+	cred, err := azblob.NewSharedKeyCredential(config[storageAccountConfigKey], storageAccountKey)
+	if err != nil {
+		return err
+	}
 
-	log.Infof("Done")
-	return err
+	u, _ := url.Parse(fmt.Sprintf(blob_url_suffix, config[storageAccountConfigKey]))
+	if err != nil {
+		return err
+	}
+
+	pipeline := azblob.NewPipeline(cred, azblob.PipelineOptions{})
+	service := azblob.NewServiceURL(*u, pipeline)
+
+	f.credential = cred
+	f.pipeline = &pipeline
+	f.service = &service
+	f.cpk = &cpk
+
+	return nil
+}
+
+func (f *FileObjectStore) PutObject(bucket string, key string, body io.Reader) error {
+	log := f.log.WithFields(logrus.Fields{
+		"bucket": bucket,
+		"key":    key,
+	})
+	log.Infof("PutObject")
+
+	container := f.service.NewContainerURL(bucket)
+	blobURL := container.NewBlockBlobURL(key)
+	_, err := azblob.UploadStreamToBlockBlob(context.Background(), body, blobURL, azblob.UploadStreamToBlockBlobOptions{ClientProvidedKeyOptions: *o.cpk})
+
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (f *FileObjectStore) ObjectExists(bucket, key string) (bool, error) {
-	path := filepath.Join(getRoot(), bucket, key)
-
 	log := f.log.WithFields(logrus.Fields{
 		"bucket": bucket,
 		"key":    key,
-		"path":   path,
 	})
 	log.Infof("ObjectExists")
+	ctx := context.Background()
+	container := f.service.NewContainerURL(bucket)
+	blob := container.NewBlobURL(key)
+	_, err := blob.GetProperties(ctx, azblob.BlobAccessConditions{}, *o.cpk)
 
-	_, err := os.Stat(path)
 	if err == nil {
-		return true, nil
-	}
-	if os.IsNotExist(err) {
-		return false, nil
+		return true, err
 	}
 
-	return true, err
+	if storageErr, ok := err.(azblob.StorageError); ok {
+		if storageErr.Response().StatusCode == 404 {
+			return false, nil
+		}
+	}
+
+	return false, err
 }
 
 func (f *FileObjectStore) GetObject(bucket, key string) (io.ReadCloser, error) {
-	path := filepath.Join(getRoot(), bucket, key)
-
 	log := f.log.WithFields(logrus.Fields{
 		"bucket": bucket,
 		"key":    key,
-		"path":   path,
 	})
 	log.Infof("GetObject")
 
-	return os.Open(path)
+	container := f.service.NewContainerURL(bucket)
+	blobURL := container.NewBlockBlobURL(key)
+	response, err := blobURL.Download(context.TODO(), 0, azblob.CountToEnd, azblob.BlobAccessConditions{}, false, *f.cpk)
+	if err != nil {
+		return nil, err
+	}
+
+	return response.Body(azblob.RetryReaderOptions{}), nil
 }
 
 func (f *FileObjectStore) ListCommonPrefixes(bucket, prefix, delimiter string) ([]string, error) {
-	path := filepath.Join(getRoot(), bucket, prefix, delimiter)
-
 	log := f.log.WithFields(logrus.Fields{
 		"bucket":    bucket,
 		"delimiter": delimiter,
-		"path":      path,
 		"prefix":    prefix,
 	})
 	log.Infof("ListCommonPrefixes")
 
-	infos, err := ioutil.ReadDir(path)
-	if err != nil {
-		return nil, err
-	}
-
-	var dirs []string
-	for _, info := range infos {
-		if info.IsDir() {
-			dirs = append(dirs, info.Name())
-		}
-	}
-
-	return dirs, nil
+	return make([]string, 0), nil // This function is not implemented.
 }
 
 func (f *FileObjectStore) ListObjects(bucket, prefix string) ([]string, error) {
-	path := filepath.Join(getRoot(), bucket, prefix)
-
 	log := f.log.WithFields(logrus.Fields{
 		"bucket": bucket,
 		"prefix": prefix,
-		"path":   path,
 	})
 	log.Infof("ListObjects")
 
-	infos, err := ioutil.ReadDir(path)
-	if err != nil {
-		return nil, err
-	}
-
 	var objects []string
-	for _, info := range infos {
-		objects = append(objects, filepath.Join(prefix, info.Name()))
-	}
+	container := f.service.NewContainerURL(bucket)
+	marker := azblob.Marker{}
 
+	for marker.NotDone() {
+		listBlob, err := container.ListBlobsFlatSegment(context.Background(), marker, azblob.ListBlobsSegmentOptions{Prefix: prefix})
+
+		if err != nil {
+			return nil, err
+		}
+		marker = listBlob.NextMarker
+
+		for _, blobInfo := range listBlob.Segment.BlobItems {
+			objects = append(objects, blobInfo.Name)
+		}
+	}
 	return objects, nil
 }
 
 func (f *FileObjectStore) DeleteObject(bucket, key string) error {
-	path := filepath.Join(getRoot(), bucket, key)
-
 	log := f.log.WithFields(logrus.Fields{
 		"bucket": bucket,
 		"key":    key,
-		"path":   path,
 	})
 	log.Infof("DeleteObject")
 
-	err := os.Remove(path)
-
-	// This logic is specific to a file system; we need to clean up the backup directory
-	// if there's nothing left. "Normal" object stores only mimic directory structures and don't need this.
-	keyParts := strings.Split(key, "/")
-	var backupPath string
-	if len(keyParts) > 1 {
-		backupPath = filepath.Join(getRoot(), bucket, keyParts[0], keyParts[1])
+	container := f.service.NewContainerURL(bucket)
+	blobURL := container.NewBlockBlobURL(key)
+	_, err := blobURL.Delete(context.Background(), azblob.DeleteSnapshotsOptionNone, azblob.BlobAccessConditions{})
+	if err != nil {
+		return err
 	}
-	if backupPath != "" {
-		infos, err := ioutil.ReadDir(backupPath)
-		if err != nil {
-			return err
-		}
-		if len(infos) == 0 {
-			l := f.log.WithFields(logrus.Fields{
-				"backupPath": backupPath,
-			})
-			l.Infof("Deleted backup directory")
-			os.Remove(backupPath)
-		}
-	}
-
-	return err
+	return nil
 }
 
 func (f *FileObjectStore) CreateSignedURL(bucket, key string, ttl time.Duration) (string, error) {
@@ -200,16 +203,19 @@ func (f *FileObjectStore) CreateSignedURL(bucket, key string, ttl time.Duration)
 		"key":    key,
 	})
 	log.Infof("CreateSignedURL")
-	return "", errors.New("CreateSignedURL is not supported for this plugin")
-}
-
-const defaultRoot = "/tmp/backups"
-
-func getRoot() string {
-	root := os.Getenv("ARK_FILE_OBJECT_STORE_ROOT")
-	if root != "" {
-		return root
+	sasQueryParams, err := azblob.BlobSASSignatureValues{
+		Protocol:      azblob.SASProtocolHTTPS,
+		ExpiryTime:    time.Now().UTC().Add(ttl),
+		ContainerName: bucket,
+		BlobName:      key,
+		Permissions:   azblob.BlobSASPermissions{Add: false, Read: true, Write: false}.String()}.NewSASQueryParameters(o.credential)
+	if err != nil {
+		log.Fatal(err)
 	}
 
-	return defaultRoot
+	qp := sasQueryParams.Encode()
+	SasUri := fmt.Sprintf("https://%s.blob.core.windows.net/%s/%s?%s",
+		f.credential.AccountName(), bucket, key, qp)
+
+	return SasUri, errors.New("Not Implemented")
 }
