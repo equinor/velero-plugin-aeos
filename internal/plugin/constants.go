@@ -1,6 +1,7 @@
 package plugin
 
 const (
+	resourceGroupConfigKey           = "resourceGroup"
 	storageAccountConfigKey          = "storageAccount"
 	storageAccountKeyEnvVarConfigKey = "storageAccountKeyEnvVar"
 	subscriptionIDConfigKey          = "subscriptionId"

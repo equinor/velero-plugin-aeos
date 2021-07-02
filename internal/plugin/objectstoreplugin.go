@@ -28,6 +28,7 @@ import (
 	"github.com/Azure/azure-pipeline-go/pipeline"
 	"github.com/Azure/azure-storage-blob-go/azblob"
 	"github.com/sirupsen/logrus"
+	veleroplugin "github.com/vmware-tanzu/velero/pkg/plugin/framework"
 )
 
 type FileObjectStore struct {
