@@ -56,10 +56,7 @@ func isValidEnvVarName(text string) bool {
 		}
 	}
 
-	if text == output {
-		return true
-	}
-	return false
+	return text == output
 }
 
 func parseBlobDomainName(domainName string) string {
