@@ -6,6 +6,8 @@ import (
 	"io/ioutil"
 	"os"
 	"testing"
+
+	"github.com/sirupsen/logrus"
 )
 
 const (
@@ -34,7 +36,8 @@ func loadtestConfigfile() (map[string]string, error) {
 		"credentialsFile",
 	}
 
-	buf, err := ioutil.ReadFile(os.Getenv(testConfigEnvVar))
+	path := os.Getenv(testConfigEnvVar)
+	buf, err := ioutil.ReadFile(path)
 	if err != nil {
 		return nil, err
 	}
@@ -74,7 +77,7 @@ func TestPreviewInit(t *testing.T) {
 		t.Error(err)
 	}
 
-	objectStore := FileObjectStore{}
+	objectStore := NewFileObjectStore(logrus.New())
 
 	err = objectStore.Init(config)
 	if err != nil {
@@ -88,7 +91,7 @@ func TestPreviewPutObject(t *testing.T) {
 		t.Error(err)
 	}
 
-	objectStore := FileObjectStore{}
+	objectStore := NewFileObjectStore(logrus.New())
 
 	err = objectStore.Init(config)
 	if err != nil {
@@ -113,7 +116,7 @@ func TestPreviewListObjects(t *testing.T) {
 		t.Error(err)
 	}
 
-	objectStore := FileObjectStore{}
+	objectStore := NewFileObjectStore(logrus.New())
 
 	err = objectStore.Init(config)
 	if err != nil {
@@ -135,7 +138,7 @@ func TestPreviewObjectExists(t *testing.T) {
 		t.Error(err)
 	}
 
-	objectStore := FileObjectStore{}
+	objectStore := NewFileObjectStore(logrus.New())
 
 	err = objectStore.Init(config)
 	if err != nil {
@@ -158,7 +161,7 @@ func TestPreviewGetObject(t *testing.T) {
 		t.Error(err)
 	}
 
-	objectStore := FileObjectStore{}
+	objectStore := NewFileObjectStore(logrus.New())
 
 	err = objectStore.Init(config)
 	if err != nil {
@@ -186,7 +189,7 @@ func TestPreviewDeleteObject(t *testing.T) {
 		t.Error(err)
 	}
 
-	objectStore := FileObjectStore{}
+	objectStore := NewFileObjectStore(logrus.New())
 
 	err = objectStore.Init(config)
 	if err != nil {

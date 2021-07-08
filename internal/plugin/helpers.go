@@ -2,7 +2,6 @@ package plugin
 
 import (
 	"bufio"
-	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -40,11 +39,7 @@ func loadSecretsFile(filename string) error {
 
 func parseLineToEnv(text string) error {
 	cleanedText := strings.TrimSpace(text)
-	inputs := strings.Split(cleanedText, "=")
-
-	if len(inputs) != 2 {
-		return errors.New("failed parse as valid env var assignment")
-	}
+	inputs := strings.SplitN(cleanedText, "=", 2)
 
 	if isValidEnvVarName(inputs[0]) {
 		os.Setenv(inputs[0], inputs[1])
@@ -56,10 +51,8 @@ func isValidEnvVarName(text string) bool {
 	var output string = ""
 
 	for _, x := range text {
-		if unicode.IsUpper(x) {
-			if unicode.IsLetter(x) || x == rune('_') {
-				output = output + string(x)
-			}
+		if unicode.IsUpper(x) || x == rune('_') {
+			output = output + string(x)
 		}
 	}
 

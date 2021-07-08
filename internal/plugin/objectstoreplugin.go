@@ -58,7 +58,7 @@ func (f *FileObjectStore) Init(config map[string]string) error {
 		return err
 	}
 
-	secrets, err := getRequiredSecrets(storageAccountKeyEnvVar, encryptionKeyEnvVar, encryptionHashEnvVar, blobDomainNameEnvVar)
+	secrets, err := getRequiredSecrets(storageAccountKeyEnvVar, encryptionKeyEnvVar, encryptionHashEnvVar)
 	if err != nil {
 		return err
 	}
@@ -73,7 +73,11 @@ func (f *FileObjectStore) Init(config map[string]string) error {
 		return err
 	}
 
-	blobDN := parseBlobDomainName(secrets[blobDomainNameEnvVar])
+	blobDN := parseBlobDomainName(os.Getenv(encryptionScopeEnvVar))
+	if blobDN == "" {
+		blobDN = defaultBlobDomain
+	}
+
 	u, _ := url.Parse(fmt.Sprintf("https://%s.%s", blobDN, config[storageAccountConfigKey]))
 	if err != nil {
 		return err
