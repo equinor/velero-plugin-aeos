@@ -73,12 +73,12 @@ func (f *FileObjectStore) Init(config map[string]string) error {
 		return err
 	}
 
-	blobDN := parseBlobDomainName(os.Getenv(encryptionScopeEnvVar))
+	blobDN := parseBlobDomainName(os.Getenv(blobDomainNameEnvVar))
 	if blobDN == "" {
 		blobDN = defaultBlobDomain
 	}
 
-	u, _ := url.Parse(fmt.Sprintf("https://%s.%s", blobDN, config[storageAccountConfigKey]))
+	u, _ := url.Parse(fmt.Sprintf("https://%s.%s", config[storageAccountConfigKey], blobDN))
 	if err != nil {
 		return err
 	}
@@ -103,7 +103,9 @@ func (f *FileObjectStore) PutObject(bucket string, key string, body io.Reader) e
 
 	container := f.service.NewContainerURL(bucket)
 	blobURL := container.NewBlockBlobURL(key)
-	_, err := azblob.UploadStreamToBlockBlob(context.Background(), body, blobURL, azblob.UploadStreamToBlockBlobOptions{ClientProvidedKeyOptions: *f.cpk})
+	r, err := azblob.UploadStreamToBlockBlob(context.Background(), body, blobURL, azblob.UploadStreamToBlockBlobOptions{ClientProvidedKeyOptions: *f.cpk})
+
+	_ = r
 
 	if err != nil {
 		return err
