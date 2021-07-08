@@ -1,4 +1,4 @@
-module github.com/vmware-tanzu/velero-plugin-example
+module github.com/equinor/velero-plugin-aeos
 
 go 1.14
 

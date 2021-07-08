@@ -14,7 +14,7 @@
 
 FROM golang:1.14-buster AS build
 ENV GOPROXY=https://proxy.golang.org
-WORKDIR /go/src/github.com/vmware-tanzu/velero-plugin-example
+WORKDIR /go/src/github.com/equinor/velero-plugin-aeos
 COPY . .
 RUN CGO_ENABLED=0 go build -o /go/bin/velero-plugin-aeos .
 
