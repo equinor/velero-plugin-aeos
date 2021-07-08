@@ -48,30 +48,34 @@ func NewFileObjectStore(log logrus.FieldLogger) *FileObjectStore {
 func (f *FileObjectStore) Init(config map[string]string) error {
 	f.log.Infof("FileObjectStore.Init called")
 	if err := veleroplugin.ValidateObjectStoreConfigKeys(config,
-		resourceGroupConfigKey,
 		storageAccountConfigKey,
 		subscriptionIDConfigKey,
-		storageAccountKeyEnvVarConfigKey,
+		credentialsFileConfigKey,
 	); err != nil {
 		return err
 	}
 
-	key := os.Getenv(encryptionKeyEnvVar)
-	hash := os.Getenv(encryptionHashEnvVar)
-	scope := ""
-	cpk := azblob.NewClientProvidedKeyOptions(&key, &hash, &scope)
-
-	storageAccountKey := os.Getenv(storageAccountKeyEnvVarConfigKey)
-	if storageAccountKey != "" {
-		return errors.New("storage account key env var not set")
+	if err := loadSecretsFile(config[credentialsFileConfigKey]); err != nil {
+		return err
 	}
 
-	cred, err := azblob.NewSharedKeyCredential(config[storageAccountConfigKey], storageAccountKey)
+	secrets, err := getRequiredSecrets(storageAccountKeyEnvVar, encryptionKeyEnvVar, encryptionHashEnvVar, blobDomainNameEnvVar)
 	if err != nil {
 		return err
 	}
 
-	u, _ := url.Parse(fmt.Sprintf(blob_url_suffix, config[storageAccountConfigKey]))
+	key := secrets[encryptionKeyEnvVar]
+	hash := secrets[encryptionHashEnvVar]
+	scope := os.Getenv(encryptionScopeEnvVar)
+	cpk := azblob.NewClientProvidedKeyOptions(&key, &hash, &scope)
+
+	cred, err := azblob.NewSharedKeyCredential(config[storageAccountConfigKey], secrets[storageAccountKeyEnvVar])
+	if err != nil {
+		return err
+	}
+
+	blobDN := parseBlobDomainName(secrets[blobDomainNameEnvVar])
+	u, _ := url.Parse(fmt.Sprintf("https://%s.%s", blobDN, config[storageAccountConfigKey]))
 	if err != nil {
 		return err
 	}
@@ -215,8 +219,9 @@ func (f *FileObjectStore) CreateSignedURL(bucket, key string, ttl time.Duration)
 	}
 
 	qp := sasQueryParams.Encode()
-	SasUri := fmt.Sprintf("https://%s.blob.core.windows.net/%s/%s?%s",
-		f.credential.AccountName(), bucket, key, qp)
+	f.service.URL()
+	SasUri := fmt.Sprintf("%s/%s/%s?%s",
+		f.service.URL().RawPath, bucket, key, qp)
 
 	return SasUri, errors.New("not implemented")
 }

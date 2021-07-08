@@ -9,7 +9,7 @@ import (
 	"unicode"
 )
 
-func retrieveRequiredSecrets(secretNames []string) (map[string]string, error) {
+func getRequiredSecrets(secretNames ...string) (map[string]string, error) {
 	var secretsMap = make(map[string]string)
 
 	for _, secretName := range secretNames {
@@ -26,7 +26,7 @@ func retrieveRequiredSecrets(secretNames []string) (map[string]string, error) {
 func loadSecretsFile(filename string) error {
 	file, err := os.Open(filename)
 	if err != nil {
-		return errors.New("failed to open")
+		return fmt.Errorf("failed to open %s", filename)
 	}
 
 	scanner := bufio.NewScanner(file)
@@ -67,4 +67,10 @@ func isValidEnvVarName(text string) bool {
 		return true
 	}
 	return false
+}
+
+func parseBlobDomainName(domainName string) string {
+	return strings.Trim(
+		strings.TrimSpace(
+			strings.ToLower(domainName)), ".")
 }
