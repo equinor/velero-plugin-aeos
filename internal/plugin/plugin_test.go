@@ -71,7 +71,7 @@ func loadtestConfigfile() (map[string]string, error) {
 	return config, nil
 }
 
-func TestPreviewInit(t *testing.T) {
+func TestInit(t *testing.T) {
 	config, err := loadtestConfigfile()
 	if err != nil {
 		t.Error(err)
@@ -85,7 +85,7 @@ func TestPreviewInit(t *testing.T) {
 	}
 }
 
-func TestPreviewPutObject(t *testing.T) {
+func TestPutObject(t *testing.T) {
 	config, err := loadtestConfigfile()
 	if err != nil {
 		t.Error(err)
@@ -110,7 +110,7 @@ func TestPreviewPutObject(t *testing.T) {
 	}
 }
 
-func TestPreviewListObjects(t *testing.T) {
+func TestListObjects(t *testing.T) {
 	config, err := loadtestConfigfile()
 	if err != nil {
 		t.Error(err)
@@ -132,7 +132,7 @@ func TestPreviewListObjects(t *testing.T) {
 	}
 }
 
-func TestPreviewObjectExists(t *testing.T) {
+func TestObjectExists(t *testing.T) {
 	config, err := loadtestConfigfile()
 	if err != nil {
 		t.Error(err)
@@ -155,7 +155,7 @@ func TestPreviewObjectExists(t *testing.T) {
 	}
 }
 
-func TestPreviewGetObject(t *testing.T) {
+func TestGetObject(t *testing.T) {
 	config, err := loadtestConfigfile()
 	if err != nil {
 		t.Error(err)
@@ -183,7 +183,7 @@ func TestPreviewGetObject(t *testing.T) {
 	}
 	t.Logf("bytes written: %d", bw)
 }
-func TestPreviewDeleteObject(t *testing.T) {
+func TestDeleteObject(t *testing.T) {
 	config, err := loadtestConfigfile()
 	if err != nil {
 		t.Error(err)
