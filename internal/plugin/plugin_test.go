@@ -9,30 +9,32 @@ import (
 )
 
 const (
-	mockConfigPath = "../mock_config_object_store_preview"
+	testConfigEnvVar = "VELERO_PLUGIN_AEOS_TEST_CONFIG"
 )
 
-var mockConfig map[string]string = make(map[string]string)
+var testConfig map[string]string = make(map[string]string)
 
-// mock config file schema
+// test config file schema
 // {
-// 	"resourceGroup": "",
 // 	"storageAccount": "",
-// 	"storageAccountKeyEnvVar": "",
-// 	"subscriptionId": "",
+//  "credentialsFile": ""
 // 	"containerName": "",
-// 	"storageAccountKey": "",
 // 	"testBlobName": "",
 // }
+// credentials file schema
+// AZURE_STORAGE_ACCOUNT_ACCESS_KEY=value
+// AZURE_BLOB_DOMAIN_NAME=value
+// AZURE_STORAGE_ACCOUNT_ENCRYPTION_KEY=value
+// AZURE_STORAGE_ACCOUNT_ENCRYPTION_HASH=value
+// AZURE_STORAGE_ACCOUNT_ENCRYPTION_SCOPE=value
 
-func loadMockConfigfile(path string) (map[string]string, error) {
-	var allowedKeys []string = []string{"resourceGroup",
+func loadtestConfigfile() (map[string]string, error) {
+	var allowedKeys []string = []string{
 		"storageAccount",
-		"storageAccountKeyEnvVar",
-		"subscriptionId",
+		"credentialsFile",
 	}
 
-	buf, err := ioutil.ReadFile(path)
+	buf, err := ioutil.ReadFile(os.Getenv(testConfigEnvVar))
 	if err != nil {
 		return nil, err
 	}
@@ -49,10 +51,8 @@ func loadMockConfigfile(path string) (map[string]string, error) {
 	}
 
 	for k, v := range config {
-		mockConfig[k] = v
+		testConfig[k] = v
 	}
-
-	os.Setenv(config["storageAccountKeyEnvVar"], config["storageAccountKey"])
 
 	for key := range config {
 		for _, allowedKey := range allowedKeys {
@@ -64,12 +64,12 @@ func loadMockConfigfile(path string) (map[string]string, error) {
 	SKIP:
 	}
 
-	println(mockConfig)
+	println(testConfig)
 	return config, nil
 }
 
 func TestPreviewInit(t *testing.T) {
-	config, err := loadMockConfigfile(mockConfigPath)
+	config, err := loadtestConfigfile()
 	if err != nil {
 		t.Error(err)
 	}
@@ -83,7 +83,7 @@ func TestPreviewInit(t *testing.T) {
 }
 
 func TestPreviewPutObject(t *testing.T) {
-	config, err := loadMockConfigfile(mockConfigPath)
+	config, err := loadtestConfigfile()
 	if err != nil {
 		t.Error(err)
 	}
@@ -95,20 +95,20 @@ func TestPreviewPutObject(t *testing.T) {
 		t.Error(err)
 	}
 
-	fd, err := os.Open(mockConfig["testFilePath"])
+	fd, err := os.Open(testConfig["testFilePath"])
 	if err != nil {
 		t.Error(err)
 	}
 	defer fd.Close()
 
-	err = objectStore.PutObject(mockConfig["containerName"], mockConfig["testBlobName"], fd)
+	err = objectStore.PutObject(testConfig["containerName"], testConfig["testBlobName"], fd)
 	if err != nil {
 		t.Error(err)
 	}
 }
 
 func TestPreviewListObjects(t *testing.T) {
-	config, err := loadMockConfigfile(mockConfigPath)
+	config, err := loadtestConfigfile()
 	if err != nil {
 		t.Error(err)
 	}
@@ -120,7 +120,7 @@ func TestPreviewListObjects(t *testing.T) {
 		t.Error(err)
 	}
 
-	objects, err := objectStore.ListObjects(mockConfig["containerName"], "")
+	objects, err := objectStore.ListObjects(testConfig["containerName"], "")
 	if err != nil {
 		t.Error(err)
 	}
@@ -130,7 +130,7 @@ func TestPreviewListObjects(t *testing.T) {
 }
 
 func TestPreviewObjectExists(t *testing.T) {
-	config, err := loadMockConfigfile(mockConfigPath)
+	config, err := loadtestConfigfile()
 	if err != nil {
 		t.Error(err)
 	}
@@ -142,7 +142,7 @@ func TestPreviewObjectExists(t *testing.T) {
 		t.Error(err)
 	}
 
-	exists, err := objectStore.ObjectExists(mockConfig["containerName"], mockConfig["testBlobName"])
+	exists, err := objectStore.ObjectExists(testConfig["containerName"], testConfig["testBlobName"])
 	if err != nil {
 		t.Error(err)
 	}
@@ -153,7 +153,7 @@ func TestPreviewObjectExists(t *testing.T) {
 }
 
 func TestPreviewGetObject(t *testing.T) {
-	config, err := loadMockConfigfile(mockConfigPath)
+	config, err := loadtestConfigfile()
 	if err != nil {
 		t.Error(err)
 	}
@@ -164,12 +164,12 @@ func TestPreviewGetObject(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	rc, err := objectStore.GetObject(mockConfig["containerName"], mockConfig["testBlobName"])
+	rc, err := objectStore.GetObject(testConfig["containerName"], testConfig["testBlobName"])
 	if err != nil {
 		t.Error(err)
 	}
 
-	fd, err := os.OpenFile(mockConfig["testFilePath"]+"-output", os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0755)
+	fd, err := os.OpenFile(testConfig["testFilePath"]+"-output", os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0755)
 	if err != nil {
 		t.Error(err)
 	}
@@ -181,7 +181,7 @@ func TestPreviewGetObject(t *testing.T) {
 	t.Logf("bytes written: %d", bw)
 }
 func TestPreviewDeleteObject(t *testing.T) {
-	config, err := loadMockConfigfile(mockConfigPath)
+	config, err := loadtestConfigfile()
 	if err != nil {
 		t.Error(err)
 	}
@@ -192,7 +192,7 @@ func TestPreviewDeleteObject(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	err = objectStore.DeleteObject(mockConfig["containerName"], mockConfig["testBlobName"])
+	err = objectStore.DeleteObject(testConfig["containerName"], testConfig["testBlobName"])
 	if err != nil {
 		t.Error(err)
 	}
