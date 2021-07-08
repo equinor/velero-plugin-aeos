@@ -24,7 +24,7 @@ import (
 
 func main() {
 	framework.NewServer().
-		RegisterObjectStore("equinor/azure-encrypted-object-store", newObjectStorePlugin).
+		RegisterObjectStore("equinor/velero-plugin-aeos", newObjectStorePlugin).
 		Serve()
 }
 
