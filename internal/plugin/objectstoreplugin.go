@@ -167,7 +167,25 @@ func (f *FileObjectStore) ListCommonPrefixes(bucket, prefix, delimiter string) (
 	})
 	log.Infof("ListCommonPrefixes")
 
-	return make([]string, 0), nil // This function is not implemented.
+	var prefixes []string
+	container := f.service.NewContainerURL(bucket)
+	marker := azblob.Marker{}
+
+	for marker.NotDone() {
+		listBlob, err := container.ListBlobsHierarchySegment(context.Background(), marker, delimiter, azblob.ListBlobsSegmentOptions{Prefix: prefix})
+
+		if err != nil {
+			return nil, err
+		}
+
+		for _, blobInfo := range listBlob.Segment.BlobPrefixes {
+			prefixes = append(prefixes, blobInfo.Name)
+		}
+
+		marker = listBlob.NextMarker
+	}
+
+	return prefixes, nil // This function is not implemented.
 }
 
 func (f *FileObjectStore) ListObjects(bucket, prefix string) ([]string, error) {
