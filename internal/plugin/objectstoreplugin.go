@@ -50,6 +50,8 @@ func (f *FileObjectStore) Init(config map[string]string) error {
 	if err := veleroplugin.ValidateObjectStoreConfigKeys(config,
 		storageAccountConfigKey,
 		credentialsFileConfigKey,
+		subscriptionIDConfigKey,
+		resourceGroupConfigKey,
 	); err != nil {
 		return err
 	}
