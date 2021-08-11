@@ -205,11 +205,12 @@ func (f *FileObjectStore) ListObjects(bucket, prefix string) ([]string, error) {
 		if err != nil {
 			return nil, err
 		}
-		marker = listBlob.NextMarker
 
 		for _, blobInfo := range listBlob.Segment.BlobItems {
 			objects = append(objects, blobInfo.Name)
 		}
+
+		marker = listBlob.NextMarker
 	}
 	return objects, nil
 }
