@@ -18,7 +18,6 @@ package plugin
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"io"
 	"net/url"
@@ -215,20 +214,23 @@ func (f *FileObjectStore) CreateSignedURL(bucket, key string, ttl time.Duration)
 		"key":    key,
 	})
 	log.Infof("CreateSignedURL")
-	sasQueryParams, err := azblob.BlobSASSignatureValues{
+
+	credential, err := azblob.NewSharedKeyCredential(bucket, key)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	sasQueryParams, err := azblob.AccountSASSignatureValues{
 		Protocol:      azblob.SASProtocolHTTPS,
 		ExpiryTime:    time.Now().UTC().Add(ttl),
-		ContainerName: bucket,
-		BlobName:      key,
-		Permissions:   azblob.BlobSASPermissions{Add: false, Read: true, Write: false}.String()}.NewSASQueryParameters(f.credential)
+		Permissions:   azblob.AccountSASPermissions{Read: true, List: true}.String(),
+		Services:      azblob.AccountSASServices{Blob: true}.String(),
+		ResourceTypes: azblob.AccountSASResourceTypes{Container: true, Object: true}.String(),
+	}.NewSASQueryParameters(credential)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	qp := sasQueryParams.Encode()
-	f.service.URL()
-	SasUri := fmt.Sprintf("%s/%s/%s?%s",
-		f.service.URL().RawPath, bucket, key, qp)
-
-	return SasUri, errors.New("not implemented")
+	return fmt.Sprintf("https://%s.%s?%s", bucket, defaultBlobDomain, qp), nil
 }
