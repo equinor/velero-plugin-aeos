@@ -2,6 +2,7 @@ package plugin
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -22,10 +23,10 @@ func getRequiredSecrets(secretNames ...string) (map[string]string, error) {
 	return secretsMap, nil
 }
 
-func loadSecretsFile(filename string) error {
-	file, err := os.Open(filename)
+func loadSecretsFile(filepath string) error {
+	file, err := os.Open(filepath)
 	if err != nil {
-		return fmt.Errorf("failed to open %s", filename)
+		return fmt.Errorf("failed to open %s", filepath)
 	}
 
 	scanner := bufio.NewScanner(file)
@@ -35,6 +36,24 @@ func loadSecretsFile(filename string) error {
 		parseLineToEnv(scanner.Text())
 	}
 	return nil
+}
+
+func resolveSecretsFile(filepath string) (string, error) {
+	var err error
+	var altFilename string
+
+	if _, err = os.Stat(filepath); err == nil {
+		return filepath, nil
+	}
+
+	if _, exists := os.LookupEnv(secretsFileEnvVar); exists {
+		altFilename = os.Getenv(secretsFileEnvVar)
+		if altFilename != "" {
+			return altFilename, nil
+		}
+	}
+
+	return "", errors.New("could not resolve secrets filepath")
 }
 
 func parseLineToEnv(text string) error {

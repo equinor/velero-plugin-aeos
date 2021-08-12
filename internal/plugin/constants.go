@@ -11,5 +11,6 @@ const (
 	encryptionKeyEnvVar      = "AZURE_STORAGE_ACCOUNT_ENCRYPTION_KEY"
 	encryptionHashEnvVar     = "AZURE_STORAGE_ACCOUNT_ENCRYPTION_HASH"
 	encryptionScopeEnvVar    = "AZURE_STORAGE_ACCOUNT_ENCRYPTION_SCOPE"
+	secretsFileEnvVar        = "AZURE_CREDENTIALS_FILE"
 	defaultBlobDomain        = "blob.core.windows.net"
 )
