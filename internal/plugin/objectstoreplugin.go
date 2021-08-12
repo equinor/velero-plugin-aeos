@@ -37,8 +37,13 @@ func (f *FileObjectStore) Init(config map[string]string) error {
 		return err
 	}
 
-	f.log.Infof("Secrets File: %s", config[credentialsFileConfigKey]) //DEBUG
-	if err := loadSecretsFile(config[credentialsFileConfigKey]); err != nil {
+	secretsFilePath, err := resolveSecretsFile(config[credentialsFileConfigKey])
+	if err != nil {
+		f.log.Error(err.Error())
+		return err
+	}
+
+	if err := loadSecretsFile(secretsFilePath); err != nil {
 		f.log.Error(err.Error())
 		return err
 	}
