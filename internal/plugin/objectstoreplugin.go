@@ -33,6 +33,7 @@ func (f *FileObjectStore) Init(config map[string]string) error {
 
 	if err := veleroplugin.ValidateObjectStoreConfigKeys(config,
 		storageAccountConfigKey,
+		credentialsFileConfigKey,
 	); err != nil {
 		return err
 	}
