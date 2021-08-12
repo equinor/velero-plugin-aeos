@@ -224,7 +224,7 @@ func (f *FileObjectStore) CreateSignedURL(bucket, key string, ttl time.Duration)
 
 	credential, err := azblob.NewSharedKeyCredential(bucket, key)
 	if err != nil {
-		log.Fatal(err)
+		return "", err
 	}
 
 	sasQueryParams, err := azblob.AccountSASSignatureValues{
@@ -235,7 +235,7 @@ func (f *FileObjectStore) CreateSignedURL(bucket, key string, ttl time.Duration)
 		ResourceTypes: azblob.AccountSASResourceTypes{Container: true, Object: true}.String(),
 	}.NewSASQueryParameters(credential)
 	if err != nil {
-		log.Fatal(err)
+		return "", err
 	}
 
 	qp := sasQueryParams.Encode()
