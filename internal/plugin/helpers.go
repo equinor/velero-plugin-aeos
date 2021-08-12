@@ -2,7 +2,6 @@ package plugin
 
 import (
 	"bufio"
-	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -38,22 +37,22 @@ func loadSecretsFile(filepath string) error {
 	return nil
 }
 
-func resolveSecretsFile(filepath string) (string, error) {
+func tryResolveSecretsFile(filepath string) (string, bool) {
 	var err error
 	var altFilename string
 
 	if _, err = os.Stat(filepath); err == nil {
-		return filepath, nil
+		return filepath, true
 	}
 
 	if _, exists := os.LookupEnv(secretsFileEnvVar); exists {
 		altFilename = os.Getenv(secretsFileEnvVar)
 		if altFilename != "" {
-			return altFilename, nil
+			return altFilename, true
 		}
 	}
 
-	return "", errors.New("could not resolve secrets filepath")
+	return "", false
 }
 
 func parseLineToEnv(text string) error {
