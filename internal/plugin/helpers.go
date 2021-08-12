@@ -83,3 +83,12 @@ func parseBlobDomainName(domainName string) string {
 		strings.TrimSpace(
 			strings.ToLower(domainName)), ".")
 }
+
+func validateEnvVars(envNames []string) bool {
+	for _, name := range envNames {
+		if _, ok := os.LookupEnv(name); !ok {
+			return false
+		}
+	}
+	return true
+}
