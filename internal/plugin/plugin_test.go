@@ -78,14 +78,14 @@ func loadtestConfigfile() (map[string]string, error) {
 func TestInit(t *testing.T) {
 	config, err := loadtestConfigfile()
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	objectStore := NewFileObjectStore(logrus.New())
 
 	err = objectStore.Init(config)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 }
 
