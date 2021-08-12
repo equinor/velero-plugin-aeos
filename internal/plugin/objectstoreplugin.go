@@ -29,28 +29,26 @@ func NewFileObjectStore(log logrus.FieldLogger) *FileObjectStore {
 
 // Init initializes the plugin. After v0.10.0, this can be called multiple times.
 func (f *FileObjectStore) Init(config map[string]string) error {
+	f.log.Infof("Init")
+
 	if err := veleroplugin.ValidateObjectStoreConfigKeys(config,
 		storageAccountConfigKey,
 		credentialsFileConfigKey,
 	); err != nil {
-		f.log.Error(err.Error())
 		return err
 	}
 
 	secretsFilePath, err := resolveSecretsFile(config[credentialsFileConfigKey])
 	if err != nil {
-		f.log.Error(err.Error())
 		return err
 	}
 
 	if err := loadSecretsFile(secretsFilePath); err != nil {
-		f.log.Error(err.Error())
 		return err
 	}
 
 	secrets, err := getRequiredSecrets(storageAccountKeyEnvVar, encryptionKeyEnvVar, encryptionHashEnvVar)
 	if err != nil {
-		f.log.Error(err.Error())
 		return err
 	}
 
@@ -61,7 +59,6 @@ func (f *FileObjectStore) Init(config map[string]string) error {
 
 	cred, err := azblob.NewSharedKeyCredential(config[storageAccountConfigKey], secrets[storageAccountKeyEnvVar])
 	if err != nil {
-		f.log.Error(err.Error())
 		return err
 	}
 
@@ -72,7 +69,6 @@ func (f *FileObjectStore) Init(config map[string]string) error {
 
 	u, _ := url.Parse(fmt.Sprintf("https://%s.%s", config[storageAccountConfigKey], blobDN))
 	if err != nil {
-		f.log.Error(err.Error())
 		return err
 	}
 
