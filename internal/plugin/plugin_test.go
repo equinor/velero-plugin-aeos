@@ -1,9 +1,10 @@
 package plugin
 
 import (
+	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"testing"
 
@@ -18,17 +19,16 @@ var testConfig map[string]string = make(map[string]string)
 
 // test config file schema
 // {
-// 	"storageAccount": "",
-//  "credentialsFile": ""
-// 	"containerName": "",
-// 	"testBlobName": "",
+//   "storageAccount": "",
+//   "credentialsFile": "",
+//   "containerName": "",
+//   "testBlobName": "",
+//   "testFilePath": ""
 // }
 // credentials file schema
 // AZURE_STORAGE_ACCOUNT_ACCESS_KEY=value
-// AZURE_BLOB_DOMAIN_NAME=value
 // AZURE_STORAGE_ACCOUNT_ENCRYPTION_KEY=value
 // AZURE_STORAGE_ACCOUNT_ENCRYPTION_HASH=value
-// AZURE_STORAGE_ACCOUNT_ENCRYPTION_SCOPE=value
 
 func loadtestConfigfile() (map[string]string, error) {
 	var allowedKeys []string = []string{
@@ -36,14 +36,18 @@ func loadtestConfigfile() (map[string]string, error) {
 		"credentialsFile",
 	}
 
-	path := os.Getenv(testConfigEnvVar)
-	buf, err := ioutil.ReadFile(path)
+	b64Config, ok := os.LookupEnv(testConfigEnvVar)
+	if !ok {
+		return nil, fmt.Errorf("could not find env var: %s", testConfigEnvVar)
+	}
+
+	bytes, err := base64.RawStdEncoding.DecodeString(b64Config)
 	if err != nil {
 		return nil, err
 	}
 
 	var data map[string]interface{}
-	err = json.Unmarshal(buf, &data)
+	err = json.Unmarshal(bytes, &data)
 	if err != nil {
 		return nil, err
 	}
