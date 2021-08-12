@@ -172,7 +172,8 @@ func TestGetObject(t *testing.T) {
 		t.Error(err)
 	}
 
-	fd, err := os.OpenFile(testConfig["testFilePath"]+"-output", os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0755)
+	var outputPath = testConfig["testFilePath"] + "-output"
+	fd, err := os.OpenFile(outputPath, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0755)
 	if err != nil {
 		t.Error(err)
 	}
@@ -181,6 +182,8 @@ func TestGetObject(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
+
+	os.Remove(outputPath) // failing to delete file should not fail the test
 	t.Logf("bytes written: %d", bw)
 }
 func TestDeleteObject(t *testing.T) {
