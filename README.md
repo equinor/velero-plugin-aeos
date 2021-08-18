@@ -17,7 +17,12 @@ AZURE_STORAGE_ACCOUNT_ENCRYPTION_KEY=
 AZURE_STORAGE_ACCOUNT_ENCRYPTION_HASH=
 ```
 
-2. If installing using the velero cli:
+2. Generate a random encryption key and hash using the hack/genkey.py script and insert them into the secrets file. 
+```
+/bin/python3 hack/keygen.py bits256
+```
+
+3. If installing using the velero cli:
 ```
 velero install \
     --provider equinor/velero-plugin-aeos \
