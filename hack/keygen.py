@@ -31,20 +31,20 @@ def main(ns: ap.Namespace):
 	key = ''.join(random.choice(string.ascii_letters) for i in range(ns.length.value))
 	key_enc = key.encode('utf-8')
 
-	key_b64 = base64.b64encode(key_enc)
-	key_b64_str = str(key_b64, 'utf-8') # encryption-key
+	key_b64 = base64.b64encode(key_enc) # encryption-key
 
 	hasher = hashlib.sha256()
 	hasher.update(key_enc)
 	hashed_key = hasher.digest()
 
 	hashed_key_b64 = base64.b64encode(hashed_key) # encryption-key-sha256
+
+	key_b64_str = str(key_b64, 'utf-8')
 	hashed_key_b64_str = str(hashed_key_b64, 'utf-8')
 
 	print(f'Key    (ASCII)\t:\t{key}')
 	print(f'Key     (B64)\t:\t{key_b64_str}')
 	print(f'KeyHash (B64)\t:\t{hashed_key_b64_str}')
-	
 
 if __name__ == '__main__':
 	main(setup())
