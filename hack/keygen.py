@@ -31,14 +31,14 @@ def main(ns: ap.Namespace):
 	key = ''.join(random.choice(string.ascii_letters) for i in range(ns.length.value))
 	key_enc = key.encode('utf-8')
 
-	keyb64 = str(base64.b64encode(key_enc), 'utf-8')
+	key_b64 = str(base64.b64encode(key_enc), 'utf-8')
 
-	md5key = hashlib.md5(key_enc).digest()
-	md5keyb64 = str(base64.b64encode(md5key), 'utf-8')
+	hashed_key = hashlib.sha256(key_enc).digest()
+	hashed_key_b64 = str(base64.b64encode(hashed_key), 'utf-8')
 
-	print(f'Key:\t\t{key}')
-	print(f'Key Base64:\t{keyb64}')
-	print(f'Hash Base64:\t{md5keyb64}')
+	print(f'Key    (ASCII)\t:\t{key}')
+	print(f'Key     (B64)\t:\t{key_b64}')
+	print(f'KeyHash (B64)\t:\t{hashed_key_b64}')
 	
 
 if __name__ == '__main__':
