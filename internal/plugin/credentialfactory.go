@@ -20,7 +20,7 @@ func credentialFactory(config PluginConfigMap) (azblob.Credential, error) {
 }
 
 func buildSharedKeyCredentialFromEnv(config PluginConfigMap) (*azblob.SharedKeyCredential, error) {
-	secrets, err := getSecrets(true, storageAccountKeyEnvVar, encryptionKeyEnvVar, encryptionHashEnvVar)
+	secrets, err := getSecrets(false, storageAccountKeyEnvVar, encryptionKeyEnvVar, encryptionHashEnvVar)
 	if err != nil {
 		return nil, err
 	}
