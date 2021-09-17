@@ -17,6 +17,15 @@ AZURE_STORAGE_ACCOUNT_ENCRYPTION_KEY=
 AZURE_STORAGE_ACCOUNT_ENCRYPTION_HASH=
 ```
 
+Or for Aad-pod-identities:
+```
+AZURE_SUBSCRIPTION_ID=
+AZURE_STORAGE_ACCOUNT_ID=
+AZURE_STORAGE_ACCOUNT_ENCRYPTION_KEY=
+AZURE_STORAGE_ACCOUNT_ENCRYPTION_HASH=
+```
+
+
 2. Generate a random encryption key and hash using the hack/genkey.py script and insert them into the secrets file. 
 ```
 /bin/python3 hack/keygen.py bits256
