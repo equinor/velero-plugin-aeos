@@ -14,29 +14,6 @@ import (
 	veleroplugin "github.com/vmware-tanzu/velero/pkg/plugin/framework"
 )
 
-func credentialFactory(config PluginConfigMap) (azblob.Credential, error) {
-	// try key based auth first
-	if _, exists := os.LookupEnv(storageAccountKeyEnvVar); exists {
-		return buildSharedKeyCredentialFromEnv(config)
-	}
-
-	return nil, nil
-}
-
-func buildSharedKeyCredentialFromEnv(config PluginConfigMap) (*azblob.SharedKeyCredential, error) {
-	secrets, err := getRequiredSecrets(storageAccountKeyEnvVar, encryptionKeyEnvVar, encryptionHashEnvVar)
-	if err != nil {
-		return nil, err
-	}
-
-	cred, err := azblob.NewSharedKeyCredential(config[storageAccountConfigKey], secrets[storageAccountKeyEnvVar])
-	if err != nil {
-		return nil, err
-	}
-
-	return cred, nil
-}
-
 type FileObjectStore struct {
 	log        logrus.FieldLogger
 	credential azblob.Credential
@@ -70,7 +47,7 @@ func (f *FileObjectStore) Init(config PluginConfigMap) error {
 		}
 	}
 
-	secrets, err := getRequiredSecrets(encryptionKeyEnvVar, encryptionHashEnvVar)
+	secrets, err := getSecrets(true, encryptionKeyEnvVar, encryptionHashEnvVar)
 	if err != nil {
 		return err
 	}

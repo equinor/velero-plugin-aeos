@@ -10,12 +10,12 @@ import (
 
 type PluginConfigMap map[string]string
 
-func getRequiredSecrets(secretNames ...string) (PluginConfigMap, error) {
+func getSecrets(required bool, secretNames ...string) (PluginConfigMap, error) {
 	var secretsMap = make(PluginConfigMap)
 
 	for _, secretName := range secretNames {
 		envVar, found := os.LookupEnv(secretName)
-		if !found {
+		if !found && required {
 			return secretsMap, fmt.Errorf("required env var %s not set", secretName)
 		}
 		secretsMap[secretName] = envVar
