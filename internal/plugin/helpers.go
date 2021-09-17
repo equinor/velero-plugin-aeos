@@ -8,8 +8,10 @@ import (
 	"unicode"
 )
 
-func getRequiredSecrets(secretNames ...string) (map[string]string, error) {
-	var secretsMap = make(map[string]string)
+type PluginConfigMap map[string]string
+
+func getRequiredSecrets(secretNames ...string) (PluginConfigMap, error) {
+	var secretsMap = make(PluginConfigMap)
 
 	for _, secretName := range secretNames {
 		envVar, found := os.LookupEnv(secretName)

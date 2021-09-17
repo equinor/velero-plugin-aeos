@@ -14,9 +14,32 @@ import (
 	veleroplugin "github.com/vmware-tanzu/velero/pkg/plugin/framework"
 )
 
+func credentialFactory(config PluginConfigMap) (azblob.Credential, error) {
+	// try key based auth first
+	if _, exists := os.LookupEnv(storageAccountKeyEnvVar); exists {
+		return buildSharedKeyCredentialFromEnv(config)
+	}
+
+	return nil, nil
+}
+
+func buildSharedKeyCredentialFromEnv(config PluginConfigMap) (*azblob.SharedKeyCredential, error) {
+	secrets, err := getRequiredSecrets(storageAccountKeyEnvVar, encryptionKeyEnvVar, encryptionHashEnvVar)
+	if err != nil {
+		return nil, err
+	}
+
+	cred, err := azblob.NewSharedKeyCredential(config[storageAccountConfigKey], secrets[storageAccountKeyEnvVar])
+	if err != nil {
+		return nil, err
+	}
+
+	return cred, nil
+}
+
 type FileObjectStore struct {
 	log        logrus.FieldLogger
-	credential *azblob.SharedKeyCredential
+	credential azblob.Credential
 	pipeline   *pipeline.Pipeline
 	service    *azblob.ServiceURL
 	cpk        *azblob.ClientProvidedKeyOptions
@@ -28,7 +51,7 @@ func NewFileObjectStore(log logrus.FieldLogger) *FileObjectStore {
 }
 
 // Init initializes the plugin. After v0.10.0, this can be called multiple times.
-func (f *FileObjectStore) Init(config map[string]string) error {
+func (f *FileObjectStore) Init(config PluginConfigMap) error {
 	f.log.Infof("Init")
 
 	if err := veleroplugin.ValidateObjectStoreConfigKeys(config,
@@ -47,7 +70,7 @@ func (f *FileObjectStore) Init(config map[string]string) error {
 		}
 	}
 
-	secrets, err := getRequiredSecrets(storageAccountKeyEnvVar, encryptionKeyEnvVar, encryptionHashEnvVar)
+	secrets, err := getRequiredSecrets(encryptionKeyEnvVar, encryptionHashEnvVar)
 	if err != nil {
 		return err
 	}
@@ -57,7 +80,7 @@ func (f *FileObjectStore) Init(config map[string]string) error {
 	scope := os.Getenv(encryptionScopeEnvVar)
 	cpk := azblob.NewClientProvidedKeyOptions(&key, &hash, &scope)
 
-	cred, err := azblob.NewSharedKeyCredential(config[storageAccountConfigKey], secrets[storageAccountKeyEnvVar])
+	cred, err := credentialFactory(config)
 	if err != nil {
 		return err
 	}
