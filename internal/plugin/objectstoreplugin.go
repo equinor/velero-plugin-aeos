@@ -29,7 +29,7 @@ func NewFileObjectStore(log logrus.FieldLogger) *FileObjectStore {
 }
 
 // Init initializes the plugin. After v0.10.0, this can be called multiple times.
-func (f *FileObjectStore) Init(config PluginConfigMap) error {
+func (f *FileObjectStore) Init(config map[string]string) error {
 	f.log.Debug("Init")
 
 	if err := veleroplugin.ValidateObjectStoreConfigKeys(config,
