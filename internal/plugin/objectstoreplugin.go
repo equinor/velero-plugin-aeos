@@ -58,7 +58,8 @@ func (f *FileObjectStore) Init(config map[string]string) error {
 	scope := os.Getenv(encryptionScopeEnvVar)
 	cpk := azblob.NewClientProvidedKeyOptions(&key, &hash, &scope)
 
-	cred, err := credentialFactory(config)
+	cf := newCredentialFactory(config, f.log)
+	cred, err := cf.Build()
 	if err != nil {
 		return err
 	}

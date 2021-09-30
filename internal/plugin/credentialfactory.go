@@ -8,24 +8,36 @@ import (
 
 	"github.com/Azure/azure-storage-blob-go/azblob"
 	"github.com/Azure/go-autorest/autorest/adal"
+	"github.com/sirupsen/logrus"
 )
 
-func credentialFactory(config PluginConfigMap) (azblob.Credential, error) {
-	// try key based auth first
-	if _, exists := os.LookupEnv(storageAccountKeyEnvVar); exists {
-		return buildSharedKeyCredentialFromEnv(config)
-	}
-
-	return getOAuthToken(config)
+type credentialFactory struct {
+	config PluginConfigMap
+	log    logrus.FieldLogger
 }
 
-func buildSharedKeyCredentialFromEnv(config PluginConfigMap) (*azblob.SharedKeyCredential, error) {
+func newCredentialFactory(config PluginConfigMap, log logrus.FieldLogger) *credentialFactory {
+	return &credentialFactory{config: config, log: log}
+}
+
+func (f *credentialFactory) Build() (azblob.Credential, error) {
+	// try key based auth first
+	if _, exists := os.LookupEnv(storageAccountKeyEnvVar); exists {
+		f.log.Debugln("Building Shared Key Credential...")
+		return f.buildSharedKeyCredentialFromEnv()
+	}
+
+	f.log.Debugln("Building MSI Credential...")
+	return f.getOAuthToken()
+}
+
+func (f *credentialFactory) buildSharedKeyCredentialFromEnv() (*azblob.SharedKeyCredential, error) {
 	secrets, err := getSecrets(false, storageAccountKeyEnvVar, encryptionKeyEnvVar, encryptionHashEnvVar)
 	if err != nil {
 		return nil, err
 	}
 
-	cred, err := azblob.NewSharedKeyCredential(config[storageAccountConfigKey], secrets[storageAccountKeyEnvVar])
+	cred, err := azblob.NewSharedKeyCredential(f.config[storageAccountConfigKey], secrets[storageAccountKeyEnvVar])
 	if err != nil {
 		return nil, err
 	}
@@ -33,15 +45,14 @@ func buildSharedKeyCredentialFromEnv(config PluginConfigMap) (*azblob.SharedKeyC
 	return cred, nil
 }
 
-func fetchMSIToken(config PluginConfigMap) (*adal.ServicePrincipalToken, error) {
-	secrets, err := getSecrets(false, subscriptionIDEnvVar, storageAccountIdEnvVar, clientIDEnvVar)
-	_ = secrets
-	_ = err
+func (f *credentialFactory) fetchMSIToken() (*adal.ServicePrincipalToken, error) {
+	secrets, _ := getSecrets(false, subscriptionIDEnvVar, storageAccountIdEnvVar, clientIDEnvVar)
 
 	msiEndpoint, err := adal.GetMSIEndpoint()
 	if err != nil {
 		return nil, err
 	}
+	f.log.Debugf("MSI Endpoint: %s\n", msiEndpoint)
 
 	var spToken *adal.ServicePrincipalToken
 	if secrets[clientIDEnvVar] == "" {
@@ -59,8 +70,8 @@ func fetchMSIToken(config PluginConfigMap) (*adal.ServicePrincipalToken, error) 
 	return spToken, nil
 }
 
-func getOAuthToken(config PluginConfigMap) (azblob.Credential, error) {
-	spt, err := fetchMSIToken(config)
+func (f *credentialFactory) getOAuthToken() (azblob.Credential, error) {
+	spt, err := f.fetchMSIToken()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -85,5 +96,6 @@ func getOAuthToken(config PluginConfigMap) (azblob.Credential, error) {
 		return time.Until(spt.Token().Expires()) - 10*time.Second
 	})
 
+	f.log.Debugf("AccessToken: %s, ExpiresIn: %s\n", spt.Token().AccessToken, spt.Token().ExpiresIn)
 	return tc, nil
 }
