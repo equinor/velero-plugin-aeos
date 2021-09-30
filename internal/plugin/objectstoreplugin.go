@@ -24,13 +24,16 @@ type FileObjectStore struct {
 
 // NewFileObjectStore instantiates a FileObjectStore.
 func NewFileObjectStore(log logrus.FieldLogger) *FileObjectStore {
-	log.Debug("New FileObjectStore")
+	log.Info("New FileObjectStore")
 	return &FileObjectStore{log: log}
 }
 
 // Init initializes the plugin. After v0.10.0, this can be called multiple times.
 func (f *FileObjectStore) Init(config map[string]string) error {
-	f.log.Debug("Init")
+	log := f.log.WithFields(logrus.Fields{
+		"config_keys": len(config),
+	})
+	log.Debug("Init")
 
 	if err := veleroplugin.ValidateObjectStoreConfigKeys(config,
 		storageAccountConfigKey,
