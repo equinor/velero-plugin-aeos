@@ -33,7 +33,7 @@ func (f *FileObjectStore) Init(config map[string]string) error {
 	log := f.log.WithFields(logrus.Fields{
 		"config_keys": len(config),
 	})
-	log.Debug("Init")
+	log.Debugf("Init")
 
 	if err := veleroplugin.ValidateObjectStoreConfigKeys(config,
 		resourceGroupConfigKey,
@@ -97,7 +97,7 @@ func (f *FileObjectStore) PutObject(bucket string, key string, body io.Reader) e
 		"bucket": bucket,
 		"key":    key,
 	})
-	log.Debug("PutObject")
+	log.Debugf("PutObject")
 
 	container := f.service.NewContainerURL(bucket)
 	blobURL := container.NewBlockBlobURL(key)
@@ -116,7 +116,7 @@ func (f *FileObjectStore) ObjectExists(bucket, key string) (bool, error) {
 		"bucket": bucket,
 		"key":    key,
 	})
-	log.Debug("ObjectExists")
+	log.Debugf("ObjectExists")
 
 	ctx := context.Background()
 	container := f.service.NewContainerURL(bucket)
@@ -141,7 +141,7 @@ func (f *FileObjectStore) GetObject(bucket, key string) (io.ReadCloser, error) {
 		"bucket": bucket,
 		"key":    key,
 	})
-	log.Debug("GetObject")
+	log.Debugf("GetObject")
 
 	container := f.service.NewContainerURL(bucket)
 	blobURL := container.NewBlockBlobURL(key)
@@ -159,7 +159,7 @@ func (f *FileObjectStore) ListCommonPrefixes(bucket, prefix, delimiter string) (
 		"delimiter": delimiter,
 		"prefix":    prefix,
 	})
-	log.Debug("ListCommonPrefixes")
+	log.Debugf("ListCommonPrefixes")
 
 	var prefixes []string
 	container := f.service.NewContainerURL(bucket)
@@ -187,7 +187,7 @@ func (f *FileObjectStore) ListObjects(bucket, prefix string) ([]string, error) {
 		"bucket": bucket,
 		"prefix": prefix,
 	})
-	log.Debug("ListObjects")
+	log.Debugf("ListObjects")
 
 	var objects []string
 	container := f.service.NewContainerURL(bucket)
@@ -214,7 +214,7 @@ func (f *FileObjectStore) DeleteObject(bucket, key string) error {
 		"bucket": bucket,
 		"key":    key,
 	})
-	log.Debug("DeleteObject")
+	log.Debugf("DeleteObject")
 
 	container := f.service.NewContainerURL(bucket)
 	blobURL := container.NewBlockBlobURL(key)
@@ -230,7 +230,7 @@ func (f *FileObjectStore) CreateSignedURL(bucket, key string, ttl time.Duration)
 		"bucket": bucket,
 		"key":    key,
 	})
-	log.Debug("CreateSignedURL")
+	log.Debugf("CreateSignedURL")
 
 	credential, err := azblob.NewSharedKeyCredential(bucket, key)
 	if err != nil {
