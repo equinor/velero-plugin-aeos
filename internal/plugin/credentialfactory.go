@@ -52,7 +52,7 @@ func (f *credentialFactory) fetchMSIToken() (*adal.ServicePrincipalToken, error)
 	if err != nil {
 		return nil, err
 	}
-	f.log.Debugf("MSI Endpoint: %s\n", msiEndpoint)
+	f.log.Infof("MSI Endpoint: %s\n", msiEndpoint)
 
 	var spToken *adal.ServicePrincipalToken
 	if secrets[clientIDEnvVar] == "" {
@@ -96,6 +96,6 @@ func (f *credentialFactory) getOAuthToken() (azblob.Credential, error) {
 		return time.Until(spt.Token().Expires()) - 10*time.Second
 	})
 
-	f.log.Debugf("AccessToken: %s, ExpiresIn: %s\n", spt.Token().AccessToken, spt.Token().ExpiresIn)
+	f.log.Infof("AccessToken: %s, ExpiresIn: %s\n", spt.Token().AccessToken, spt.Token().ExpiresIn)
 	return tc, nil
 }
