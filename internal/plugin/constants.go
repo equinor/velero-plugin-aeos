@@ -15,5 +15,5 @@ const (
 	secretsFileEnvVar        = "AZURE_CREDENTIALS_FILE"
 	clientIDEnvVar           = "AZURE_CLIENT_ID"
 	defaultBlobDomain        = "blob.core.windows.net"
-	publicResourceManager    = "https://management.azure.com/"
+	publicResourceManager    = "https://storage.azure.com/"
 )
