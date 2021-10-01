@@ -7,7 +7,6 @@ const (
 	blockSizeConfigKey       = "blockSizeInBytes"
 	credentialsFileConfigKey = "credentialsFile"
 	subscriptionIDEnvVar     = "AZURE_SUBSCRIPTION_ID"
-	storageAccountIdEnvVar   = "AZURE_STORAGE_ACCOUNT_ID"
 	storageAccountKeyEnvVar  = "AZURE_STORAGE_ACCOUNT_ACCESS_KEY"
 	blobDomainNameEnvVar     = "AZURE_BLOB_DOMAIN_NAME"
 	encryptionKeyEnvVar      = "AZURE_STORAGE_ACCOUNT_ENCRYPTION_KEY"

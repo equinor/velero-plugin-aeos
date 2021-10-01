@@ -36,7 +36,10 @@ func (f *FileObjectStore) Init(config map[string]string) error {
 	log.Debug("Init")
 
 	if err := veleroplugin.ValidateObjectStoreConfigKeys(config,
+		resourceGroupConfigKey,
 		storageAccountConfigKey,
+		subscriptionIDConfigKey,
+		blockSizeConfigKey,
 		credentialsFileConfigKey,
 	); err != nil {
 		return err
@@ -45,6 +48,7 @@ func (f *FileObjectStore) Init(config map[string]string) error {
 	// make best effort to find a valid secret file either from the config or the environment.
 	// if one is found, load it. if not, assume secret vars are loaded into the environment already.
 	secretsFilePath, ok := tryResolveSecretsFile(config[credentialsFileConfigKey])
+	log.Debugf("Secrets File: %s", secretsFilePath)
 	if ok {
 		if err := loadSecretsFile(secretsFilePath); err != nil {
 			return err
