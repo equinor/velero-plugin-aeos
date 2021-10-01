@@ -17,8 +17,8 @@ import (
 type FileObjectStore struct {
 	log        logrus.FieldLogger
 	credential azblob.Credential
-	pipeline   *pipeline.Pipeline
-	service    *azblob.ServiceURL
+	pipeline   pipeline.Pipeline
+	service    azblob.ServiceURL
 	cpk        *azblob.ClientProvidedKeyOptions
 }
 
@@ -86,8 +86,8 @@ func (f *FileObjectStore) Init(config map[string]string) error {
 	log.Infof("Service URL: %s", service.String())
 
 	f.credential = cred
-	f.pipeline = &pipeline
-	f.service = &service
+	f.pipeline = pipeline
+	f.service = service
 	f.cpk = &cpk
 
 	return nil
