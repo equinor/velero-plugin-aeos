@@ -24,7 +24,7 @@ type FileObjectStore struct {
 
 // NewFileObjectStore instantiates a FileObjectStore.
 func NewFileObjectStore(log logrus.FieldLogger) *FileObjectStore {
-	log.Info("New FileObjectStore")
+	log.Debugf("New FileObjectStore")
 	return &FileObjectStore{log: log}
 }
 
@@ -33,7 +33,7 @@ func (f *FileObjectStore) Init(config map[string]string) error {
 	log := f.log.WithFields(logrus.Fields{
 		"config_keys": len(config),
 	})
-	log.Infof("Init")
+	log.Debugf("Init")
 
 	if err := veleroplugin.ValidateObjectStoreConfigKeys(config,
 		resourceGroupConfigKey,
@@ -48,7 +48,7 @@ func (f *FileObjectStore) Init(config map[string]string) error {
 	// make best effort to find a valid secret file either from the config or the environment.
 	// if one is found, load it. if not, assume secret vars are loaded into the environment already.
 	secretsFilePath, ok := tryResolveSecretsFile(config[credentialsFileConfigKey])
-	log.Infof("Secrets File: %s", secretsFilePath)
+	log.Debugf("Secrets File: %s", secretsFilePath)
 	if ok {
 		if err := loadSecretsFile(secretsFilePath); err != nil {
 			return err
@@ -83,7 +83,7 @@ func (f *FileObjectStore) Init(config map[string]string) error {
 
 	pipeline := azblob.NewPipeline(cred, azblob.PipelineOptions{})
 	service := azblob.NewServiceURL(*u, pipeline)
-	log.Infof("Service URL: %s", service.String())
+	log.Debugf("Service URL: %s", service.String())
 
 	f.credential = cred
 	f.pipeline = pipeline
@@ -98,7 +98,7 @@ func (f *FileObjectStore) PutObject(bucket string, key string, body io.Reader) e
 		"bucket": bucket,
 		"key":    key,
 	})
-	log.Infof("PutObject")
+	log.Debugf("PutObject")
 
 	container := f.service.NewContainerURL(bucket)
 	blobURL := container.NewBlockBlobURL(key)
@@ -117,7 +117,7 @@ func (f *FileObjectStore) ObjectExists(bucket, key string) (bool, error) {
 		"bucket": bucket,
 		"key":    key,
 	})
-	log.Infof("ObjectExists")
+	log.Debugf("ObjectExists")
 
 	ctx := context.Background()
 	container := f.service.NewContainerURL(bucket)
@@ -142,7 +142,7 @@ func (f *FileObjectStore) GetObject(bucket, key string) (io.ReadCloser, error) {
 		"bucket": bucket,
 		"key":    key,
 	})
-	log.Infof("GetObject")
+	log.Debugf("GetObject")
 
 	container := f.service.NewContainerURL(bucket)
 	blobURL := container.NewBlockBlobURL(key)
@@ -160,7 +160,7 @@ func (f *FileObjectStore) ListCommonPrefixes(bucket, prefix, delimiter string) (
 		"delimiter": delimiter,
 		"prefix":    prefix,
 	})
-	log.Infof("ListCommonPrefixes")
+	log.Debugf("ListCommonPrefixes")
 
 	var prefixes []string
 	container := f.service.NewContainerURL(bucket)
@@ -188,7 +188,7 @@ func (f *FileObjectStore) ListObjects(bucket, prefix string) ([]string, error) {
 		"bucket": bucket,
 		"prefix": prefix,
 	})
-	log.Infof("ListObjects")
+	log.Debugf("ListObjects")
 
 	var objects []string
 	container := f.service.NewContainerURL(bucket)
@@ -215,7 +215,7 @@ func (f *FileObjectStore) DeleteObject(bucket, key string) error {
 		"bucket": bucket,
 		"key":    key,
 	})
-	log.Infof("DeleteObject")
+	log.Debugf("DeleteObject")
 
 	container := f.service.NewContainerURL(bucket)
 	blobURL := container.NewBlockBlobURL(key)
@@ -231,7 +231,7 @@ func (f *FileObjectStore) CreateSignedURL(bucket, key string, ttl time.Duration)
 		"bucket": bucket,
 		"key":    key,
 	})
-	log.Infof("CreateSignedURL")
+	log.Debugf("CreateSignedURL")
 
 	credential, err := azblob.NewSharedKeyCredential(bucket, key)
 	if err != nil {
