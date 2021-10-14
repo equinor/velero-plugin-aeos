@@ -15,7 +15,7 @@ const (
 	testConfigEnvVar = "VELERO_PLUGIN_AEOS_TEST_CONFIG"
 )
 
-var testConfig map[string]string = make(map[string]string)
+var testConfig PluginConfigMap = make(PluginConfigMap)
 
 // test config file schema
 // {
@@ -30,7 +30,7 @@ var testConfig map[string]string = make(map[string]string)
 // AZURE_STORAGE_ACCOUNT_ENCRYPTION_KEY=value
 // AZURE_STORAGE_ACCOUNT_ENCRYPTION_HASH=value
 
-func loadtestConfigfile() (map[string]string, error) {
+func loadtestConfigfile() (PluginConfigMap, error) {
 	var allowedKeys []string = []string{
 		"storageAccount",
 		"credentialsFile",
@@ -52,7 +52,7 @@ func loadtestConfigfile() (map[string]string, error) {
 		return nil, err
 	}
 
-	config := make(map[string]string)
+	config := make(PluginConfigMap)
 	for k, v := range data {
 		config[k] = v.(string)
 	}
