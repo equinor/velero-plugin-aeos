@@ -8,7 +8,7 @@ This plugin provides an object store that encrypts all k8s objects with a client
 ## Installation and Usage
 Usage is similar to official azure plugin. Docs
 
-Currently, the only authentication method supported by this plugin is the azure storage account access key.
+Currently, the only access keys and aad-pod-identity based authentication are supported by this plugin. SP based auth may come in the future.
 
 1. Create a secrets file named 'credentials-velero' with the following keys. This secrets file can be shared with the official azure plugin.
 ```
@@ -17,7 +17,7 @@ AZURE_STORAGE_ACCOUNT_ENCRYPTION_KEY=
 AZURE_STORAGE_ACCOUNT_ENCRYPTION_HASH=
 ```
 
-Or for Aad-pod-identities:
+Or for aad-pod-identities:
 ```
 AZURE_SUBSCRIPTION_ID=
 AZURE_STORAGE_ACCOUNT_ID=
@@ -41,6 +41,8 @@ velero install \
     --backup-location-config storageAccount=$AZURE_STORAGE_ACCOUNT_ID,storageAccountKeyEnvVar=AZURE_STORAGE_ACCOUNT_ACCESS_KEY \
     --use-volume-snapshots=false
 ```
+## Using AEOS with the official Azure Plugin
+Coming soon.
 
 ## Unit Tests
 Builds are tested against a real azure storage account. See the 'Build' badge for the current status of the build and test workflow on the main branch.
