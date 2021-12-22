@@ -164,6 +164,9 @@ func (f *FileObjectStore) ListCommonPrefixes(bucket, prefix, delimiter string) (
 
 	var prefixes []string
 	container := f.service.NewContainerURL(bucket)
+
+	log.Debugf("Container URL: %s", container.String())
+
 	marker := azblob.Marker{}
 
 	for marker.NotDone() {
