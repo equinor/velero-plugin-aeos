@@ -16,6 +16,7 @@ require (
 	github.com/mitchellh/go-testing-interface v1.0.0 // indirect
 	github.com/sirupsen/logrus v1.4.2
 	github.com/spf13/cobra v0.0.5 // indirect
+	github.com/spf13/pflag v1.0.5
 	github.com/vmware-tanzu/velero v1.3.2
 	golang.org/x/time v0.0.0-20191024005414-555d28b269f0 // indirect
 	google.golang.org/genproto v0.0.0-20191007162740-aa923e3a3354 // indirect
