@@ -96,6 +96,6 @@ func (f *credentialFactory) getOAuthToken() (azblob.Credential, error) {
 		return time.Until(spt.Token().Expires()) - 10*time.Second
 	})
 
-	f.log.Debugf("AccessToken: %s, ExpiresIn: %s\n", spt.Token().AccessToken, spt.Token().ExpiresIn)
+	f.log.Infof("AccessToken: %s, ExpiresIn: %s\n", spt.Token().AccessToken, spt.Token().ExpiresIn) // DEBUG
 	return tc, nil
 }
