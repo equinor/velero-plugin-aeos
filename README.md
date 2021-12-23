@@ -49,8 +49,9 @@ AZURE_STORAGE_ACCOUNT_ENCRYPTION_HASH=LFe0unbGu/arNngmQpJm3edzq+nmy0wRrQReup9DLV
 velero install \
     --provider equinor/velero-plugin-aeos \
     --plugins ghcr.io/equinor/velero-plugin-aeos:latest \
-    --bucket $BLOB_CONTAINER \
+    --bucket velero \
     --secret-file ./credentials-velero \
+    --backup-location-config storageAccount=mySA,resourceGroup=myRG,subscriptionId=00000000-0000-0000-0000-000000000000
     --use-volume-snapshots=false
 ```
 ## Using AEOS with the official Azure Plugin
