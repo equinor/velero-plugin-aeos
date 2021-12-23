@@ -1,4 +1,4 @@
-# Azure Encrypted Object Store - Velero Plugin
+# Velero Plugin: Azure Encrypted Object Store
 ![example branch main](https://github.com/equinor/velero-plugin-aeos/actions/workflows/build.yml/badge.svg)
 ![example branch main](https://github.com/equinor/velero-plugin-aeos/actions/workflows/docker-publish.yml/badge.svg)
 
