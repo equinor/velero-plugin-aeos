@@ -40,7 +40,6 @@ AZURE_STORAGE_ACCOUNT_ENCRYPTION_HASH=LFe0unbGu/arNngmQpJm3edzq+nmy0wRrQReup9DLV
 
 Or for MSI / pod-identities:
 ```
-AZURE_SUBSCRIPTION_ID=
 AZURE_STORAGE_ACCOUNT_ENCRYPTION_KEY=aU9zdkhEdWR2dWdVTFd5QUtuaHR2YWtCQmdxa2pTTms
 AZURE_STORAGE_ACCOUNT_ENCRYPTION_HASH=LFe0unbGu/arNngmQpJm3edzq+nmy0wRrQReup9DLVY=
 ```
@@ -52,7 +51,6 @@ velero install \
     --plugins ghcr.io/equinor/velero-plugin-aeos:latest \
     --bucket $BLOB_CONTAINER \
     --secret-file ./credentials-velero \
-    --backup-location-config storageAccount=$AZURE_STORAGE_ACCOUNT_ID,storageAccountKeyEnvVar=AZURE_STORAGE_ACCOUNT_ACCESS_KEY \
     --use-volume-snapshots=false
 ```
 ## Using AEOS with the official Azure Plugin
