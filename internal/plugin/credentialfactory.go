@@ -46,7 +46,7 @@ func (f *credentialFactory) buildSharedKeyCredentialFromEnv() (*azblob.SharedKey
 }
 
 func (f *credentialFactory) fetchMSIToken() (*adal.ServicePrincipalToken, error) {
-	secrets, _ := getSecrets(false, subscriptionIDEnvVar, clientIDEnvVar)
+	secrets, _ := getSecrets(false, f.config[subscriptionIDConfigKey], clientIDEnvVar)
 
 	msiEndpoint, err := adal.GetMSIEndpoint()
 	if err != nil {
