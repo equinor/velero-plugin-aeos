@@ -125,8 +125,6 @@ spec:
   schedule: '@every 24h'
   template:
     includeClusterResources: false
-    excludedResources:
-      - *
     includedResources:
       - secrets
     snapshotVolumes: false
