@@ -2,7 +2,7 @@
 ![example branch main](https://github.com/equinor/velero-plugin-aeos/actions/workflows/build.yml/badge.svg)
 ![example branch main](https://github.com/equinor/velero-plugin-aeos/actions/workflows/docker-publish.yml/badge.svg)
 
-## Overview and Features
+## Overview
 This plugin provides a velero object store that creates [client-side encrypted backups](https://docs.microsoft.com/en-us/azure/storage/common/storage-client-side-encryption?toc=%2Fazure%2Fstorage%2Fblobs%2Ftoc.json&tabs=dotnet) for Microsoft Azure Storage Accounts and fills a feature gap in the official [Azure plugin](https://github.com/vmware-tanzu/velero-plugin-for-microsoft-azure).
 
 ## FAQ
