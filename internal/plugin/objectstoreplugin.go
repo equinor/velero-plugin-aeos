@@ -122,7 +122,7 @@ func (f *FileObjectStore) ObjectExists(bucket, key string) (bool, error) {
 	_, err := blob.GetProperties(ctx, azblob.BlobAccessConditions{}, *f.cpk)
 
 	if err == nil {
-		return true, err.(azblob.ResponseError)
+		return true, nil
 	}
 
 	if storageErr, ok := err.(azblob.StorageError); ok {
@@ -131,7 +131,7 @@ func (f *FileObjectStore) ObjectExists(bucket, key string) (bool, error) {
 		}
 	}
 
-	return false, err
+	return false, err.(azblob.ResponseError)
 }
 
 func (f *FileObjectStore) GetObject(bucket, key string) (io.ReadCloser, error) {
