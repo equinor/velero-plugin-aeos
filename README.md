@@ -34,13 +34,13 @@ KeyHash (B64)   :       LFe0unbGu/arNngmQpJm3edzq+nmy0wRrQReup9DLVY=
 2. Create a secrets file named 'credentials-velero' with the following keys. This secrets file can be shared with the official azure plugin.
 ```
 AZURE_STORAGE_ACCOUNT_ACCESS_KEY=
-AZURE_STORAGE_ACCOUNT_ENCRYPTION_KEY=aU9zdkhEdWR2dWdVTFd5QUtuaHR2YWtCQmdxa2pTTms
+AZURE_STORAGE_ACCOUNT_ENCRYPTION_KEY=aU9zdkhEdWR2dWdVTFd5QUtuaHR2YWtCQmdxa2pTTms=
 AZURE_STORAGE_ACCOUNT_ENCRYPTION_HASH=LFe0unbGu/arNngmQpJm3edzq+nmy0wRrQReup9DLVY=
 ```
 
 Or for MSI / pod-identities:
 ```
-AZURE_STORAGE_ACCOUNT_ENCRYPTION_KEY=aU9zdkhEdWR2dWdVTFd5QUtuaHR2YWtCQmdxa2pTTms
+AZURE_STORAGE_ACCOUNT_ENCRYPTION_KEY=aU9zdkhEdWR2dWdVTFd5QUtuaHR2YWtCQmdxa2pTTms=
 AZURE_STORAGE_ACCOUNT_ENCRYPTION_HASH=LFe0unbGu/arNngmQpJm3edzq+nmy0wRrQReup9DLVY=
 ```
 
