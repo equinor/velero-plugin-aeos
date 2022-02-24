@@ -102,12 +102,9 @@ func (f *FileObjectStore) PutObject(bucket string, key string, body io.Reader) e
 
 	container := f.service.NewContainerURL(bucket)
 	blobURL := container.NewBlockBlobURL(key)
-	r, err := azblob.UploadStreamToBlockBlob(context.Background(), body, blobURL, azblob.UploadStreamToBlockBlobOptions{ClientProvidedKeyOptions: *f.cpk})
-
-	_ = r
-
+	_, err := azblob.UploadStreamToBlockBlob(context.Background(), body, blobURL, azblob.UploadStreamToBlockBlobOptions{ClientProvidedKeyOptions: *f.cpk})
 	if err != nil {
-		return err
+		return err.(azblob.ResponseError)
 	}
 	return nil
 }
@@ -125,7 +122,7 @@ func (f *FileObjectStore) ObjectExists(bucket, key string) (bool, error) {
 	_, err := blob.GetProperties(ctx, azblob.BlobAccessConditions{}, *f.cpk)
 
 	if err == nil {
-		return true, err
+		return true, err.(azblob.ResponseError)
 	}
 
 	if storageErr, ok := err.(azblob.StorageError); ok {
@@ -148,7 +145,7 @@ func (f *FileObjectStore) GetObject(bucket, key string) (io.ReadCloser, error) {
 	blobURL := container.NewBlockBlobURL(key)
 	response, err := blobURL.Download(context.TODO(), 0, azblob.CountToEnd, azblob.BlobAccessConditions{}, false, *f.cpk)
 	if err != nil {
-		return nil, err
+		return nil, err.(azblob.ResponseError)
 	}
 
 	return response.Body(azblob.RetryReaderOptions{}), nil
@@ -170,7 +167,7 @@ func (f *FileObjectStore) ListCommonPrefixes(bucket, prefix, delimiter string) (
 		listBlob, err := container.ListBlobsHierarchySegment(context.Background(), marker, delimiter, azblob.ListBlobsSegmentOptions{Prefix: prefix})
 
 		if err != nil {
-			return nil, err
+			return nil, err.(azblob.ResponseError)
 		}
 
 		for _, blobInfo := range listBlob.Segment.BlobPrefixes {
@@ -198,7 +195,7 @@ func (f *FileObjectStore) ListObjects(bucket, prefix string) ([]string, error) {
 		listBlob, err := container.ListBlobsFlatSegment(context.Background(), marker, azblob.ListBlobsSegmentOptions{Prefix: prefix})
 
 		if err != nil {
-			return nil, err
+			return nil, err.(azblob.ResponseError)
 		}
 
 		for _, blobInfo := range listBlob.Segment.BlobItems {
@@ -221,7 +218,7 @@ func (f *FileObjectStore) DeleteObject(bucket, key string) error {
 	blobURL := container.NewBlockBlobURL(key)
 	_, err := blobURL.Delete(context.Background(), azblob.DeleteSnapshotsOptionNone, azblob.BlobAccessConditions{})
 	if err != nil {
-		return err
+		return err.(azblob.ResponseError)
 	}
 	return nil
 }
