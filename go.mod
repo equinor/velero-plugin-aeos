@@ -13,7 +13,7 @@ require (
 	github.com/hashicorp/yamux v0.0.0-20190923154419-df201c70410d // indirect
 	github.com/imdario/mergo v0.3.9 // indirect
 	github.com/mitchellh/go-testing-interface v1.0.0 // indirect
-	github.com/sirupsen/logrus v1.8.1
+	github.com/sirupsen/logrus v1.9.2
 	github.com/spf13/cobra v0.0.5 // indirect
 	github.com/spf13/pflag v1.0.5
 	github.com/stretchr/objx v0.1.1 // indirect
